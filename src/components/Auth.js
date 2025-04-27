@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Nhập useNavigate
+import { saveAuthToLocal } from "../services/authService";
 
 const Auth = ({ setUser, closeModal }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -38,6 +39,8 @@ const Auth = ({ setUser, closeModal }) => {
           dob: formData.dob,
         };
 
+    console.log("Payload gửi đến API:", payload);
+
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -46,26 +49,35 @@ const Auth = ({ setUser, closeModal }) => {
       });
 
       const data = await response.json();
+      console.log("Phản hồi từ API:", data);
+
       if (!response.ok || (data.code && data.code !== 1000)) {
         throw new Error(data.message || "Có lỗi xảy ra");
       }
 
-      if (isLogin && data.result?.token) {
-        // ✅ Lưu token và username
-        localStorage.setItem("token", data.result.token);
-        localStorage.setItem("username", formData.username);
-        setUser({ token: data.result.token, username: formData.username });
+      if (!isLogin) {
+        console.log("Đăng ký thành công:", data);
+        setIsLogin(true); // Chuyển sang màn hình đăng nhập sau khi đăng ký thành công
+      }
 
-        // Đóng modal và chuyển hướng đến trang chủ hoặc trang khác
+      if (isLogin && data.result?.token) {
+        console.log("Lưu token vào localStorage...");
+        saveAuthToLocal({
+          token: data.result.token,
+          refreshToken: data.result.refreshToken || null, // Xử lý trường hợp thiếu refreshToken
+          username: formData.username,
+        });
+
+        setUser({
+          token: data.result.token,
+          username: formData.username,
+        });
+
         closeModal();
-        navigate("/"); // Chuyển hướng về trang chủ sau khi đăng nhập thành công
-      } else if (!isLogin) {
-        // Sau khi đăng ký thành công, chuyển sang chế độ đăng nhập
-        setIsLogin(true);
-        setError("Tài khoản đã được tạo thành công. Vui lòng đăng nhập.");
       }
     } catch (err) {
-      setError(err.message);
+      console.error("Lỗi khi đăng nhập:", err);
+      setError(err.message || "Có lỗi xảy ra");
     } finally {
       setIsLoading(false);
     }
@@ -74,12 +86,19 @@ const Auth = ({ setUser, closeModal }) => {
   return (
     <div className="auth-container">
       <div className="auth-header text-center mb-4">
-        <h3 className="auth-title">{isLogin ? "Chào mừng quay lại" : "Tạo tài khoản"}</h3>
-        <p className="auth-subtitle">{isLogin ? "Đăng nhập để tiếp tục" : "Gia nhập để bắt đầu"}</p>
+        <h3 className="auth-title">
+          {isLogin ? "Chào mừng quay lại" : "Tạo tài khoản"}
+        </h3>
+        <p className="auth-subtitle">
+          {isLogin ? "Đăng nhập để tiếp tục" : "Gia nhập để bắt đầu"}
+        </p>
       </div>
 
       {error && (
-        <div className="alert alert-danger alert-dismissible fade show" role="alert">
+        <div
+          className="alert alert-danger alert-dismissible fade show"
+          role="alert"
+        >
           {error}
           <button
             type="button"
@@ -174,16 +193,26 @@ const Auth = ({ setUser, closeModal }) => {
         >
           {isLoading ? (
             <>
-              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <span
+                className="spinner-border spinner-border-sm me-2"
+                role="status"
+                aria-hidden="true"
+              ></span>
               {isLogin ? "Đang đăng nhập..." : "Đang tạo tài khoản..."}
             </>
-          ) : isLogin ? "Đăng nhập" : "Đăng ký"}
+          ) : isLogin ? (
+            "Đăng nhập"
+          ) : (
+            "Đăng ký"
+          )}
         </button>
       </form>
 
       <div className="auth-footer text-center mt-3">
         <button className="btn btn-link" onClick={() => setIsLogin(!isLogin)}>
-          {isLogin ? "Chưa có tài khoản? Đăng ký" : "Đã có tài khoản? Đăng nhập"}
+          {isLogin
+            ? "Chưa có tài khoản? Đăng ký"
+            : "Đã có tài khoản? Đăng nhập"}
         </button>
       </div>
     </div>

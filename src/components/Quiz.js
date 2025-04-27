@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { getValidAccessToken } from "../services/authService";
 
 const Quiz = () => {
   const { quizId } = useParams();  // Lấy quizId từ URL
@@ -11,35 +12,87 @@ const Quiz = () => {
   const [timeLeft, setTimeLeft] = useState(1800); // 30 phút
   const navigate = useNavigate();
 
-  const handleSubmit = useCallback(() => {
-    const token = localStorage.getItem("token");
+  const fetchUserId = async () => {
+    const token = await getValidAccessToken(); // Lấy token hợp lệ
+    if (!token) {
+      throw new Error("Không tìm thấy token. Vui lòng đăng nhập.");
+    }
   
-    const responses = questions.map((q, index) => ({
-      questionId: q.id,
-      selectedOption: answers[index]
-    }));
-  
-    const payload = {
-      testId: quizId, // phải là Number nếu cần
-      userId: "currentUserId", // cần lấy từ context hoặc token decode
-      responses
-    };
-  
-    fetch("https://final-quiz-server.onrender.com/identity/results", {
-      method: "POST",
+    const response = await fetch("https://final-quiz-server.onrender.com/identity/users/myInfo", {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(result => {
-        navigate(`/quiz/${quizId}/result`, { state: { result } });
-      })
-      .catch(err => {
-        console.error("Gửi kết quả thất bại:", err);
+    });
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Lỗi từ API /myInfo:", errorData);
+      throw new Error("Không thể lấy thông tin người dùng.");
+    }
+  
+    const data = await response.json();
+    console.log("Phản hồi từ API /myInfo:", data);
+  
+    // Lấy userId từ data.result.id
+    const userId = data.result?.id;
+    if (!userId) {
+      throw new Error("Không thể lấy userId. Vui lòng thử lại.");
+    }
+  
+    return userId;
+  };
+
+  const handleSubmit = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Không tìm thấy token. Vui lòng đăng nhập.");
+      }
+  
+      // Lấy userId từ API
+      const userId = await fetchUserId();
+      if (!userId) {
+        throw new Error("Không thể lấy userId. Vui lòng thử lại.");
+      }
+  
+      // Chuẩn bị payload
+      const responses = questions.map((q, index) => ({
+        questionId: q.id,
+        selectedOption: answers[index] || "", // Nếu chưa trả lời, gửi chuỗi rỗng
+      }));
+  
+      const payload = {
+        testId: Number(quizId), // Đảm bảo testId là số
+        userId,
+        responses,
+      };
+  
+      console.log("Payload gửi đến API:", payload);
+  
+      // Gửi dữ liệu đến API
+      const response = await fetch("https://final-quiz-server.onrender.com/identity/tests/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
       });
+  
+      console.log("Phản hồi từ API:", response);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Lỗi từ API:", errorData);
+        throw new Error(errorData.message || "Không thể gửi kết quả bài kiểm tra.");
+      }
+  
+      const result = await response.json();
+      navigate(`/quiz/${quizId}/result`, { state: { result } });
+    } catch (err) {
+      console.error("Gửi kết quả thất bại:", err);
+      setError(err.message || "Có lỗi xảy ra khi gửi kết quả.");
+    }
   }, [answers, questions, quizId, navigate]);
 
   // Lấy câu hỏi từ API khi quizId thay đổi

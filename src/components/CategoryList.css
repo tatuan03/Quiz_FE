@@ -1,0 +1,55 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  /* Căn chỉnh các ô category */
+.category-card {
+  cursor: pointer;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 10px; /* Khoảng cách giữa các ô */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  transition: transform 0.2s ease-in-out; /* Hiệu ứng khi hover */
+}
+
+.category-card:hover {
+  transform: scale(1.05); /* Phóng to nhẹ khi hover */
+  background: #e9ecef; /* Thay đổi màu nền khi hover */
+}
+
+/* Căn chỉnh hàng */
+.category-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px; /* Khoảng cách giữa các ô */
+}

@@ -1,0 +1,121 @@
+.question-manager {
+    padding: 20px;
+  }
+  
+  .question-manager h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .question-manager table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .question-manager table th,
+  .question-manager table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .question-manager table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .question-manager table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .question-manager table tr:hover {
+    background-color: #f1f1f1;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .btn-back {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+
+  /* Nút Thêm */
+.btn-add {
+    background-color: #28a745; /* Màu xanh lá */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+    margin-left: 5px;
+  }
+  
+  .btn-add:hover {
+    background-color: #218838; /* Màu xanh lá đậm hơn khi hover */
+  }
+  
+  /* Nút Sửa */
+  .btn-edit {
+    background-color: #ffc107; /* Màu vàng */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 5px;
+  }
+  
+  .btn-edit:hover {
+    background-color: #e0a800; /* Màu vàng đậm hơn khi hover */
+  }
+  
+  /* Nút Xóa */
+  .btn-delete {
+    background-color: #f44336; /* Màu đỏ */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .btn-delete:hover {
+    background-color: #d32f2f; /* Màu đỏ đậm hơn khi hover */
+  }

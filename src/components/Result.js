@@ -1,66 +1,111 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Result = () => {
-  const { state } = useLocation();
   const navigate = useNavigate();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { quizId, responses } = state || {};
-
-  useEffect(() => {
+  const fetchUserId = async () => {
     const token = localStorage.getItem("token");
-
-    if (!token || !quizId || !responses) {
-      setError("Thiếu thông tin để tính kết quả.");
-      setLoading(false);
-      return;
+    if (!token) {
+      throw new Error("Không tìm thấy token. Vui lòng đăng nhập.");
     }
 
-    // Gửi responses lên API để tính kết quả
-    const payload = {
-      testId: Number(quizId),
-      userId: "userId_placeholder", // bạn có thể lấy từ decode JWT hoặc context
-      responses
+    const response = await fetch("https://final-quiz-server.onrender.com/identity/users/myInfo", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Lỗi từ API /myInfo:", errorData);
+      throw new Error("Không thể lấy thông tin người dùng.");
+    }
+
+    const data = await response.json();
+    return data.result?.id; // Lấy userId từ data.result.id
+  };
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setError("Không tìm thấy token. Vui lòng đăng nhập.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Lấy userId từ API
+        const userId = await fetchUserId();
+        if (!userId) {
+          throw new Error("Không thể lấy userId. Vui lòng thử lại.");
+        }
+
+        // Gọi API để lấy danh sách kết quả
+        const response = await fetch(`https://final-quiz-server.onrender.com/identity/tests/results/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Lỗi từ API:", errorData);
+          throw new Error(errorData.message || "Không thể lấy danh sách kết quả.");
+        }
+
+        const data = await response.json();
+        console.log("Dữ liệu trả về từ API:", data);
+        setResult(data);
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách kết quả:", err);
+        setError(err.message || "Không thể lấy danh sách kết quả.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetch("https://final-quiz-server.onrender.com/identity/results", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setResult(data);
-      })
-      .catch((err) => {
-        console.error("Lỗi khi gửi kết quả:", err);
-        setError("Không thể tính kết quả.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [quizId, responses]);
+    fetchResults();
+  }, []);
 
-  if (loading) return <div>Đang tính điểm...</div>;
+  if (loading) return <div>Đang tải kết quả...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
-
-  const total = result.responses.length;
-  const correct = result.responses.filter((r) => r.isCorrect).length;
-  const score = correct * 5;
-  const percentage = Math.round((correct / total) * 100);
+  if (!result || result.length === 0) {
+    return <div className="alert alert-warning">Không có dữ liệu kết quả để hiển thị.</div>;
+  }
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4">Kết quả bài làm</h2>
-      <p><strong>Điểm:</strong> {score} / {total * 5}</p>
-      <p><strong>Trả lời đúng:</strong> {correct} / {total}</p>
-      <p><strong>Tỷ lệ đúng:</strong> {percentage}%</p>
+      <h2 className="mb-4">Danh sách kết quả bài làm</h2>
+      <table className="table table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên bài kiểm tra</th>
+            <th>Số câu hỏi</th>
+            <th>Số câu đúng</th>
+            <th>Tỷ lệ đúng (%)</th>
+            <th>Người làm bài</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.map((item, index) => (
+            <tr key={item.id}>
+              <td>{index + 1}</td>
+              <td>{item.testName}</td>
+              <td>{item.totalQuestions}</td>
+              <td>{item.correctAnswers}</td>
+              <td>{item.percentage}%</td>
+              <td>{item.userName}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       <button className="btn btn-primary mt-4" onClick={() => navigate("/")}>
         Về trang chủ

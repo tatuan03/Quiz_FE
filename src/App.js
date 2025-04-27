@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Container, Navbar, Nav } from "react-bootstrap";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import Start from "./components/Start";
 import Quiz from "./components/Quiz";
@@ -8,11 +8,22 @@ import Result from "./components/Result";
 import Auth from "./components/Auth";
 import CategoryList from "./components/CategoryList";
 import QuizList from "./components/QuizList";
+import AdminDashboard from "./components/AdminDashboard";
 import { DataProvider } from "./context/dataContext";
-import { checkAuthOnLoad, logoutUser } from "./services/authService";
-import './App.css';
+import { logoutUser } from "./services/authService";
+import "./App.css";
+import CategoryManager from "./components/CategoryManager";
+import MainDashboard from "./components/MainDashboard";
+import TestManager from "./components/TestManager";
+import QuestionManager from "./components/QuestionManager";
 
-function Layout({ user, setUser, showAuthModal, setShowAuthModal, handleLogout }) {
+function Layout({
+  user,
+  setUser,
+  showAuthModal,
+  setShowAuthModal,
+  handleLogout,
+}) {
   const navigate = useNavigate();
 
   return (
@@ -30,9 +41,22 @@ function Layout({ user, setUser, showAuthModal, setShowAuthModal, handleLogout }
             {user ? (
               <>
                 <span className="text-white me-2">
-                  Welcome, <strong>{user.username || user.name}</strong>
+                  Welcome, <strong>{user.username}</strong>
                 </span>
-                <Button variant="outline-light" size="sm" onClick={handleLogout}>
+                {user.isAdmin && (
+                  <Button
+                    variant="outline-light"
+                    size="sm"
+                    onClick={() => navigate("/admin")}
+                  >
+                    Admin Dashboard
+                  </Button>
+                )}
+                <Button
+                  variant="outline-light"
+                  size="sm"
+                  onClick={handleLogout}
+                >
                   Logout
                 </Button>
               </>
@@ -49,7 +73,11 @@ function Layout({ user, setUser, showAuthModal, setShowAuthModal, handleLogout }
       </Navbar>
 
       {/* Modal đăng nhập */}
-      <Modal show={showAuthModal} onHide={() => setShowAuthModal(false)} centered>
+      <Modal
+        show={showAuthModal}
+        onHide={() => setShowAuthModal(false)}
+        centered
+      >
         <Modal.Header closeButton>
           <Modal.Title>Login</Modal.Title>
         </Modal.Header>
@@ -59,13 +87,25 @@ function Layout({ user, setUser, showAuthModal, setShowAuthModal, handleLogout }
       </Modal>
 
       <Routes>
-        <Route path="/" element={<CategoryList />} />
+        <Route path="/" element={<CategoryList user={user} />} />
         <Route path="/category/:categoryId" element={<QuizList />} />
+        <Route
+          path="/category/:categoryId/tests"
+          element={<TestManager />}
+        />{" "}
+        {/* Trang quản lý bài test */}
+        <Route path="/tests/:testId/questions" element={<QuestionManager />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/result" element={<Result />} />
-        <Route path="/start" element={<Start user={user} setUser={setUser} />} />
+        <Route
+          path="/start"
+          element={<Start user={user} setUser={setUser} />}
+        />
         <Route path="/quiz/:quizId" element={<Quiz />} />
         <Route path="/quiz/:quizId/result" element={<Result />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/categories" element={<CategoryManager />} />
+        <Route path="/main-dashboard" element={<MainDashboard />} />
       </Routes>
     </>
   );
@@ -74,28 +114,51 @@ function Layout({ user, setUser, showAuthModal, setShowAuthModal, handleLogout }
 function App() {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const handleLogout = async () => {
     await logoutUser();
     setUser(null);
   };
 
-  // Kiểm tra token khi ứng dụng load
   useEffect(() => {
-    const initAuth = async () => {
+    const fetchUserRole = async () => {
       const token = localStorage.getItem("token");
-      const username = localStorage.getItem("username");
-      if (token && username) {
-        const isStillValid = await checkAuthOnLoad(() => {
+
+      if (token) {
+        try {
+          const response = await fetch(
+            "https://final-quiz-server.onrender.com/identity/users/myInfo",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Không thể lấy thông tin người dùng.");
+          }
+
+          const data = await response.json();
+          const roles = data.result?.roles || [];
+          const isAdmin = roles.some((role) => role.name === "ADMIN");
+
+          setUser({ username: data.result.username, isAdmin });
+
+          // Chỉ điều hướng đến /main-dashboard nếu người dùng đang ở trang gốc "/"
+          if (isAdmin && location.pathname === "/") {
+            navigate("/main-dashboard");
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy vai trò người dùng:", err);
           setUser(null);
-        });
-        if (isStillValid) {
-          setUser({ token, username });
         }
       }
     };
-    initAuth();
-  }, []);
+
+    fetchUserRole();
+  }, [navigate, location.pathname]);
 
   return (
     <DataProvider>

@@ -1,0 +1,200 @@
+/* Container chính */
+.test-manager {
+    padding: 20px;
+  }
+  
+  .test-manager h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  /* Bảng hiển thị */
+  .test-manager table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .test-manager table th,
+  .test-manager table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .test-manager table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .test-manager table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .test-manager table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Nút Quay lại */
+  .btn-back {
+    background-color: #007bff; /* Màu xanh dương */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+  }
+  
+  .btn-back:hover {
+    background-color: #0056b3; /* Màu xanh dương đậm hơn khi hover */
+  }
+  
+  /* Nút Thêm câu hỏi */
+  .btn-add-question-global {
+    background-color: #28a745; /* Màu xanh lá */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  
+  .btn-add-question-global:hover {
+    background-color: #218838; /* Màu xanh lá đậm hơn khi hover */
+  }
+  
+  /* Modal overlay */
+  .add-modal, .edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Màu nền mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal content */
+  .modal-content {
+    background-color: white; /* Màu nền trắng */
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hiệu ứng đổ bóng */
+    animation: fadeIn 0.3s ease-in-out; /* Hiệu ứng xuất hiện */
+  }
+  
+  /* Animation cho modal */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  /* Tiêu đề modal */
+  .modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+  }
+  
+  /* Input và textarea */
+  .modal-content input,
+  .modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  /* Nút hành động */
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .modal-actions button:first-child {
+    background-color: #4caf50; /* Màu xanh lá */
+    color: white;
+  }
+  
+  .modal-actions button:last-child {
+    background-color: #f44336; /* Màu đỏ */
+    color: white;
+  }
+  
+  .modal-actions button:hover {
+    opacity: 0.9; /* Hiệu ứng hover */
+  }
+
+  /* Nút Thêm bài test */
+.btn-add-test {
+    background-color: #17a2b8; /* Màu xanh dương nhạt */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 10px 0;
+    margin-left: 5px;
+  }
+  
+  .btn-add-test:hover {
+    background-color: #138496; /* Màu xanh dương đậm hơn khi hover */
+  }
+
+  /* Nút Xóa */
+.btn-delete {
+    background-color: #f44336; /* Màu đỏ */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .btn-delete:hover {
+    background-color: #d32f2f; /* Màu đỏ đậm hơn khi hover */
+  }
+
+  /* Nút Quản lý câu hỏi */
+.btn-manage-questions {
+    background-color: #6c757d; /* Màu xám */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 5px;
+  }
+  
+  .btn-manage-questions:hover {
+    background-color: #5a6268; /* Màu xám đậm hơn khi hover */
+  }
