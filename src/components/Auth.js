@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Nhập useNavigate
 import { saveAuthToLocal } from "../services/authService";
 
 const Auth = ({ setUser, closeModal }) => {
