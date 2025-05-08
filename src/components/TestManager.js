@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./TestManager.css";
 const TestManager = () => {
@@ -19,7 +19,8 @@ const TestManager = () => {
   const navigate = useNavigate();
 
   // Gọi API để lấy danh sách bài test
-  const fetchTests = async () => {
+  // Ghi nhớ hàm fetchTests để tránh tạo lại mỗi lần render
+  const fetchTests = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setError("Không tìm thấy token. Vui lòng đăng nhập.");
@@ -59,7 +60,7 @@ const TestManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [categoryId]); // Ghi nhớ hàm fetchTests với phụ thuộc categoryId
 
   const handleDeleteTest = async (testId) => {
     const token = localStorage.getItem("token");
@@ -130,7 +131,7 @@ const TestManager = () => {
 
   useEffect(() => {
     fetchTests();
-  }, [categoryId]);
+  }, [fetchTests]);
 
   const handleAddTest = async () => {
     const token = localStorage.getItem("token");

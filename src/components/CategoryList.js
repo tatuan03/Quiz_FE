@@ -11,10 +11,6 @@ const CategoryList = ({ user }) => {
   const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
-  const showLoginModal = () => {
-    setLoginModalVisible(true);
-  };
-
   const hideLoginModal = () => {
     setLoginModalVisible(false);
   };

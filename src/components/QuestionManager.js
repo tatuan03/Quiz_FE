@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "./QuestionManager.css"; // Import CSS cho QuestionManager
 const QuestionManager = () => {
@@ -19,7 +19,8 @@ const QuestionManager = () => {
     correctOption: "",
   }); // Quản lý dữ liệu câu hỏi mới
   // Gọi API để lấy danh sách câu hỏi
-  const fetchQuestions = async () => {
+  // Ghi nhớ hàm fetchQuestions để tránh tạo lại mỗi lần render
+  const fetchQuestions = useCallback(async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setError("Không tìm thấy token. Vui lòng đăng nhập.");
@@ -46,18 +47,18 @@ const QuestionManager = () => {
       }
 
       const data = await response.json();
-      setQuestions(data.questions); // Lấy danh sách câu hỏi từ `data.questions`
+      setQuestions(data.questions);
     } catch (err) {
       console.error("Lỗi khi lấy danh sách câu hỏi:", err);
       setError(err.message || "Không thể lấy danh sách câu hỏi.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [testId]); // testId là phụ thuộc của useCallback
 
   useEffect(() => {
     fetchQuestions();
-  }, [testId]);
+  }, [fetchQuestions]); // Thêm fetchQuestions vào mảng phụ thuộc
 
   // Hàm xử lý khi người dùng nhấn nút "Thêm câu hỏi"
   const handleAddQuestion = async () => {

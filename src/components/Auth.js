@@ -14,8 +14,6 @@ const Auth = ({ setUser, closeModal }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate(); // Khởi tạo navigate
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

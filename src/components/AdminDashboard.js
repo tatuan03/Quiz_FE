@@ -10,6 +10,7 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingUser, setEditingUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [sortOrder, setSortOrder] = useState("asc"); // Thêm state cho sortOrder
   const navigate = useNavigate();
 
   const fetchUsers = async () => {
@@ -52,6 +53,19 @@ const AdminDashboard = () => {
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const handleSortByUsername = () => {
+    const sortedUsers = [...users].sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.username.localeCompare(b.username); // tăng dần
+      } else {
+        return b.username.localeCompare(a.username); // giảm dần
+      }
+    });
+
+    setUsers(sortedUsers); // Cập nhật danh sách người dùng đã sắp xếp
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Đổi thứ tự sắp xếp
+  };
 
   const handleEditUser = (userId) => {
     const user = users.find((u) => u.id === userId);
@@ -121,12 +135,16 @@ const AdminDashboard = () => {
     user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="loading">Đang tải danh sách người dùng...</div>;
+  if (loading)
+    return <div className="loading">Đang tải danh sách người dùng...</div>;
   if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="admin-dashboard">
-      <div className="dashboard-overview" onClick={() => setShowManagement(!showManagement)}>
+      <div
+        className="dashboard-overview"
+        onClick={() => setShowManagement(!showManagement)}
+      >
         <div className="total-users-card">
           <h2>Tổng số người dùng</h2>
           <div className="total-count">{users.length}</div>
@@ -163,7 +181,18 @@ const AdminDashboard = () => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Tên người dùng</th>
+                  <th>
+                    Tên người dùng
+                    <button
+                      className="sort-btn"
+                      onClick={handleSortByUsername}
+                      title={`Sắp xếp theo ${
+                        sortOrder === "asc" ? "giảm dần" : "tăng dần"
+                      }`}
+                    >
+                      {sortOrder === "asc" ? "▲" : "▼"}
+                    </button>
+                  </th>
                   <th>Vai trò</th>
                   <th>Hành động</th>
                 </tr>
@@ -201,7 +230,10 @@ const AdminDashboard = () => {
                   type="text"
                   value={editingUser.firstName}
                   onChange={(e) =>
-                    setEditingUser({ ...editingUser, firstName: e.target.value })
+                    setEditingUser({
+                      ...editingUser,
+                      firstName: e.target.value,
+                    })
                   }
                 />
               </div>
@@ -238,7 +270,11 @@ const AdminDashboard = () => {
                 </select>
               </div>
               <div className="modal-actions">
-                <button type="button" className="btn-save" onClick={handleSaveUser}>
+                <button
+                  type="button"
+                  className="btn-save"
+                  onClick={handleSaveUser}
+                >
                   Lưu
                 </button>
                 <button

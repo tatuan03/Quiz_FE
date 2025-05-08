@@ -1,6 +1,6 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import DataContext from "../context/dataContext";
-import Auth from "./Auth"; 
+import Auth from "./Auth";
 import "./Start.css";
 import { getValidAccessToken } from "../services/authService";
 
@@ -11,7 +11,7 @@ const Start = ({ user, setUser }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
       const token = await getValidAccessToken();
@@ -21,20 +21,23 @@ const Start = ({ user, setUser }) => {
         setShowLoginPopup(true); // Show login modal
         return;
       }
-  
-      const response = await fetch("https://final-quiz-server.onrender.com/identity/categories", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
+
+      const response = await fetch(
+        "https://final-quiz-server.onrender.com/identity/categories",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       if (response.status === 401) {
         setUser(null);
         localStorage.clear();
         setShowLoginPopup(true); // Show login modal
         return;
       }
-  
+
       if (!response.ok) throw new Error("Failed to fetch categories");
-  
+
       const data = await response.json();
       setCategories(Array.isArray(data) ? data : data.result);
       setError(null);
@@ -47,11 +50,11 @@ const Start = ({ user, setUser }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setUser]); // Ghi nhớ hàm fetchCategories với phụ thuộc setUser
 
   useEffect(() => {
     fetchCategories();
-  }, [setUser]);
+  }, [fetchCategories]); // Thêm fetchCategories vào mảng phụ thuộc
 
   const handleStartQuiz = (categoryId) => {
     if (!user) {
@@ -63,14 +66,19 @@ const Start = ({ user, setUser }) => {
 
   return (
     <div className="start-background">
-      <section className="text-center" style={{ display: showStart ? "block" : "none" }}>
+      <section
+        className="text-center"
+        style={{ display: showStart ? "block" : "none" }}
+      >
         <div className="container">
           <div className="row align-items-center justify-content-center paddi">
             <h1 className="fw-bold mb-4">Chọn chủ đề</h1>
-            
+
             {error && (
               <div className="alert alert-danger">
-                {error.includes("Unauthorized") ? "Vui lòng đăng nhập để tiếp tục." : error}
+                {error.includes("Unauthorized")
+                  ? "Vui lòng đăng nhập để tiếp tục."
+                  : error}
               </div>
             )}
 
@@ -82,29 +90,38 @@ const Start = ({ user, setUser }) => {
               </div>
             ) : (
               <div className="category-card-container">
-                {Array.isArray(categories) && categories.map((category) => (
-                  <div
-                    key={category.id}
-                    className="level-card"
-                    onClick={() => handleStartQuiz(category.id)}
-                    style={{ backgroundColor: "#f5f5f5" }}
-                  >
-                    <h5 className="card-title fw-bold">{category.title}</h5>
-                    <p className="card-text text-muted">{category.description}</p>
-                  </div>
-                ))}
+                {Array.isArray(categories) &&
+                  categories.map((category) => (
+                    <div
+                      key={category.id}
+                      className="level-card"
+                      onClick={() => handleStartQuiz(category.id)}
+                      style={{ backgroundColor: "#f5f5f5" }}
+                    >
+                      <h5 className="card-title fw-bold">{category.title}</h5>
+                      <p className="card-text text-muted">
+                        {category.description}
+                      </p>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
         </div>
 
         {showLoginPopup && (
-          <div className="modal d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div
+            className="modal d-block"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Yêu cầu đăng nhập</h5>
-                  <button className="btn-close" onClick={() => setShowLoginPopup(false)}></button>
+                  <button
+                    className="btn-close"
+                    onClick={() => setShowLoginPopup(false)}
+                  ></button>
                 </div>
                 <div className="modal-body">
                   <Auth
